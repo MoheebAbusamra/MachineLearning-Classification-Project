@@ -1,0 +1,9 @@
+artifact_location: file:c:/Users/Moheeb/Desktop/ML_Classification_Project/mlruns/490695274478244813
+creation_time: 1793571839677
+effective_trace_archival_retention: null
+experiment_id: '490695274478244813'
+last_update_time: 1793571839677
+lifecycle_stage: active
+name: Car Insurance Claim - Classification
+trace_location: null
+workspace: default
