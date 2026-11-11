@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Car Insurance Claim Classification: Discussion Guide</title>
+<style>
+  :root{
+    --bg:#f7f7f4; --panel:#ffffff; --ink:#1f2328; --muted:#5b6470; --line:#e3e3dc;
+    --accent:#2f6f8f; --accent-soft:#e6f0f5; --warn:#b5651d; --warn-soft:#fbefe3;
+    --good:#2e7d4f; --good-soft:#e5f3ea; --code:#f1f1ec;
+    --claim:#DD8452; --noclaim:#4C72B0;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#16181b; --panel:#1e2125; --ink:#e6e6e3; --muted:#a0a7b0; --line:#2d3137;
+      --accent:#7fb6d3; --accent-soft:#1f2f38; --warn:#e3a46a; --warn-soft:#3a2b1e;
+      --good:#7fcf9d; --good-soft:#1d3226; --code:#26292e;
+    }
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .layout{display:grid;grid-template-columns:250px 1fr;max-width:1200px;margin:0 auto}
+  nav{position:sticky;top:0;height:100vh;overflow:auto;padding:28px 18px;border-right:1px solid var(--line)}
+  nav .brand{font-weight:700;font-size:15px;margin-bottom:14px}
+  nav a{display:block;color:var(--muted);text-decoration:none;font-size:14px;padding:4px 8px;border-radius:6px}
+  nav a:hover{background:var(--accent-soft);color:var(--ink)}
+  nav .grp{margin-top:14px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding-left:8px}
+  main{padding:36px 44px 80px;min-width:0}
+  h1{font-size:30px;line-height:1.25;margin:0 0 6px}
+  h2{font-size:23px;margin:54px 0 10px;padding-top:8px;border-top:1px solid var(--line)}
+  h3{font-size:17px;margin:26px 0 6px}
+  p{margin:8px 0}
+  .sub{color:var(--muted);margin-bottom:22px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin:14px 0}
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .stat .v{font-size:24px;font-weight:700}
+  .stat .l{font-size:13px;color:var(--muted)}
+  .flow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+  .flow span{background:var(--accent-soft);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:14px}
+  .flow b{color:var(--muted);font-weight:400}
+  code{background:var(--code);padding:1px 5px;border-radius:4px;font-size:.9em}
+  table{border-collapse:collapse;width:100%;font-size:14.5px;margin:10px 0}
+  th,td{border-bottom:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{font-weight:600;color:var(--muted);font-size:13px;text-transform:uppercase;letter-spacing:.03em}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+  tr.best td{background:var(--good-soft)}
+  .box{border-left:4px solid var(--accent);background:var(--accent-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0}
+  .box.warn{border-color:var(--warn);background:var(--warn-soft)}
+  .box.good{border-color:var(--good);background:var(--good-soft)}
+  .tag{display:inline-block;font-size:12px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--accent-soft);color:var(--accent);margin-right:6px}
+  details{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0}
+  details summary{cursor:pointer;font-weight:600}
+  details[open] summary{margin-bottom:6px}
+  .bar{display:flex;align-items:center;gap:10px;margin:4px 0;font-size:14px}
+  .bar .name{width:150px;flex:none}
+  .bar .track{flex:1;background:var(--code);border-radius:6px;height:16px;position:relative}
+  .bar .fill{height:100%;border-radius:6px;background:var(--accent)}
+  .bar .val{width:52px;text-align:right;font-variant-numeric:tabular-nums}
+  .cm{display:grid;grid-template-columns:110px 1fr 1fr;gap:6px;max-width:440px;font-size:14px;margin:10px 0}
+  .cm div{padding:10px;border-radius:8px;text-align:center}
+  .cm .h{color:var(--muted);font-size:12.5px;background:none}
+  .cm .tp{background:var(--good-soft)} .cm .tn{background:var(--good-soft)}
+  .cm .fp{background:var(--warn-soft)} .cm .fn{background:var(--warn-soft);font-weight:700}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  ul{padding-left:22px;margin:6px 0} li{margin:3px 0}
+  .muted{color:var(--muted)}
+  @media (max-width:900px){.layout{grid-template-columns:1fr} nav{position:static;height:auto;border-right:none;border-bottom:1px solid var(--line)} main{padding:24px 18px} .two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="layout">
+<nav>
+  <div class="brand">Discussion Guide</div>
+  <a href="#overview">Project in one minute</a>
+  <div class="grp">The notebook</div>
+  <a href="#s1">1. Setup and MLflow</a>
+  <a href="#s2">2. Dataset description</a>
+  <a href="#s3">3. Data cleaning</a>
+  <a href="#s4">4. Visualisation (EDA)</a>
+  <a href="#s5">5. Preprocessing</a>
+  <a href="#s6">6. Baseline models</a>
+  <a href="#s7">7. Feature selection</a>
+  <a href="#s8">8. Hyperparameter tuning</a>
+  <a href="#s9">9. Test set evaluation</a>
+  <a href="#s10">10. Learning curves and bias-variance</a>
+  <div class="grp">Concepts</div>
+  <a href="#c-data">Data and preprocessing</a>
+  <a href="#c-eval">Evaluation and metrics</a>
+  <a href="#c-models">The 5 models and their hyperparameters</a>
+  <a href="#c-fs">Feature selection methods</a>
+  <a href="#c-diag">Bias, variance and the curves</a>
+  <a href="#c-mlflow">MLflow</a>
+  <div class="grp">Practice</div>
+  <a href="#qa">Likely questions</a>
+  <a href="#numbers">Numbers to remember</a>
+</nav>
+
+<main>
+<h1>Car Insurance Claim Prediction</h1>
+<p class="sub">Supervised binary classification. A walk through what was done in each section, how it was done, what the results mean, and the concepts behind them.</p>
+
+<section id="overview">
+<div class="grid">
+  <div class="stat"><div class="v">10,301</div><div class="l">customers after cleaning</div></div>
+  <div class="stat"><div class="v">23 → 36</div><div class="l">features → model columns</div></div>
+  <div class="stat"><div class="v">26.7%</div><div class="l">of customers claimed (imbalanced)</div></div>
+  <div class="stat"><div class="v">0.832</div><div class="l">best test ROC-AUC (Gradient Boosting)</div></div>
+  <div class="stat"><div class="v">427 / 549</div><div class="l">claimants caught by the best model</div></div>
+  <div class="stat"><div class="v">168</div><div class="l">MLflow runs logged</div></div>
+</div>
+
+<div class="card">
+<p><b>The problem:</b> an insurance company wants to know, before it happens, which customers are likely to file a claim. The target is <code>CLAIM_FLAG</code> (1 = claimed, 0 = no claim). The inputs are the customer's demographics (age, kids, marital status), finances (income, home value), car (type, value, age, use) and driving history (past claims, traffic points, revoked licence).</p>
+<p><b>The story in one paragraph:</b> we audited and cleaned the data (removed a column that leaked the answer, fixed currency stored as text, set impossible values to missing), explored it with six figures, built one preprocessing pipeline, trained 5 models plus a Dummy baseline with 5-fold cross-validation, selected features with filters, wrappers and L1, tuned hyperparameters with grid search, lowered the decision threshold because missing a claimant is costly, and only then tested once on the held-out 20%. Gradient Boosting won (ROC-AUC 0.832, F1 0.621, recall 0.778). Learning curves and the bias-variance decomposition show the remaining limit is bias: the features themselves carry limited signal.</p>
+</div>
+
+<div class="flow">
+  <span>Raw CSV</span><b>→</b><span>Audit</span><b>→</b><span>Clean</span><b>→</b><span>EDA</span><b>→</b><span>Split 80/20</span><b>→</b><span>Pipeline</span><b>→</b><span>Baselines (CV)</span><b>→</b><span>Feature selection</span><b>→</b><span>Tuning + threshold</span><b>→</b><span>Test once</span><b>→</b><span>Diagnose</span>
+</div>
+</section>
+
+<!-- ============ SECTIONS ============ -->
+
+<h2 id="s1">1. Setup and MLflow</h2>
+<p><b>What we did:</b> imported the libraries, fixed the random seed (<code>RANDOM_STATE = 42</code>), created the MLflow experiment "Car Insurance Claim - Classification" in a local <code>./mlruns</code> folder, and loaded the CSV into <code>df_raw</code>.</p>
+<p><b>Why:</b> the seed makes every random step (split, folds, trees) repeat exactly, so results are reproducible. MLflow is required by the module: every experiment, its settings, scores and plots are recorded so they can be compared later.</p>
+<div class="box">If asked "why <code>n_jobs=1</code>?": running in parallel on Windows printed pickling errors, so everything runs on one core. It only affects speed, not results.</div>
+
+<h2 id="s2">2. Dataset Description and Audit</h2>
+<p><b>What we did:</b> described the domain, listed every column with its meaning and type, checked the target balance, measured missing values, and searched for data quality problems before changing anything.</p>
+<table>
+<tr><th>Check</th><th>What we found</th><th>What we decided</th></tr>
+<tr><td>Size and types</td><td>10,302 rows × 27 columns. 5 money columns are text like <code>"$67,349"</code>.</td><td>Convert to numbers (Section 3).</td></tr>
+<tr><td>Feature types</td><td>9 numeric, 5 currency, 7 binary, 1 ordinal (<code>EDUCATION</code>), 2 nominal (<code>OCCUPATION</code>, <code>CAR_TYPE</code>), 1 date, 1 ID, plus the target.</td><td>Each group gets its own preprocessing.</td></tr>
+<tr><td>Target balance</td><td>73.34% no claim vs 26.66% claim (2.75 : 1).</td><td>Stratify, and do not trust accuracy.</td></tr>
+<tr><td>Missing values</td><td>6 columns, 1.08% of all cells, but 25.67% of rows have at least one.</td><td>Impute, do not drop rows.</td></tr>
+<tr><td>Missing vs target</td><td>Claim rate is about the same when missing or present (e.g. INCOME 24.6% vs 26.8%).</td><td>Missingness is not a signal, so simple imputation is safe.</td></tr>
+<tr><td>Leakage</td><td><code>CLM_AMT &gt; 0</code> matches <code>CLAIM_FLAG = 1</code> perfectly (0 exceptions).</td><td>Drop <code>CLM_AMT</code>: it is only known after a claim.</td></tr>
+<tr><td>Duplicates</td><td>1 exact duplicate row. 1,332 IDs repeat, but rows differ.</td><td>Remove the duplicate, drop <code>ID</code> as a feature.</td></tr>
+<tr><td>Impossible values</td><td><code>CAR_AGE = -3</code>.</td><td>Set to missing (Section 3).</td></tr>
+<tr><td>Outliers (IQR rule)</td><td>Many flagged in <code>KIDSDRIV</code>, <code>HOMEKIDS</code>, <code>OLDCLAIM</code>, but these columns are mostly zeros, so the fences are narrow.</td><td>Keep them: they are real customers, not errors.</td></tr>
+</table>
+<div class="box warn"><b>Key talking point, leakage:</b> a model with <code>CLM_AMT</code> would score almost 100%, but it would be useless because the claim amount does not exist at the moment we need the prediction. Spotting this is the most important audit result.</div>
+
+<h2 id="s3">3. Data Cleaning</h2>
+<p><b>What we did, in order, on a copy <code>df</code> (the original stays as <code>df_raw</code>):</b></p>
+<ul>
+  <li>Removed the 1 exact duplicate row (10,302 → 10,301).</li>
+  <li>Converted the 5 currency columns to numbers with a regex helper <code>parse_money</code> (removes <code>$</code> and <code>,</code>).</li>
+  <li>Removed the export leftover <code>z_</code> prefix from labels (<code>z_No</code> → <code>No</code>) and shortened long labels ("Highly Urban/ Urban" → "Urban").</li>
+  <li>Checked whether <code>BIRTH</code> could fill the 7 missing ages: it gives ages 11 to 15, below driving age, so it is unreliable. <code>BIRTH</code> matches <code>AGE</code> in 99.88% of rows, so it was dropped as redundant.</li>
+  <li>Set impossible values to missing: 1 negative <code>CAR_AGE</code>, 13 <code>YOJ</code> values meaning the job started before age 10.</li>
+  <li>Consistency checks passed: <code>OLDCLAIM &gt; 0</code> exactly when <code>CLM_FREQ &gt; 0</code>; every single parent has children at home.</li>
+  <li>Dropped <code>ID</code>, <code>BIRTH</code>, <code>CLM_AMT</code>, leaving 23 features. Assigned each to a group: 13 numeric, 7 binary, 1 ordinal, 2 nominal.</li>
+</ul>
+<div class="box"><b>Why impossible values become NaN instead of being deleted:</b> the rest of the row is still good data. Setting one cell to missing lets the pipeline impute it, and we keep the customer.</div>
+
+<h2 id="s4">4. Visualisation and Exploration (EDA)</h2>
+<p>Six figures, each answering one question. Colours are fixed: <span style="color:var(--noclaim);font-weight:600">blue = no claim</span>, <span style="color:var(--claim);font-weight:600">orange = claim</span>. All six are logged to MLflow in one run.</p>
+<table>
+<tr><th>Figure</th><th>Question it answers</th><th>What it told us</th></tr>
+<tr><td>4.1 Target distribution</td><td>How balanced is the target?</td><td>73.3% vs 26.7%. Use stratification and ROC-AUC/F1, not accuracy.</td></tr>
+<tr><td>4.2 Missing values</td><td>Drop or impute? Do missing values cluster?</td><td>Low (max 6.46%), scattered, indicator correlations below 0.03. Impute.</td></tr>
+<tr><td>4.3 Numeric distributions</td><td>What shape is each feature, and which values are more common for claimants?</td><td>Claimants are more common at zero income, zero home value, more past claims and more traffic points. Strong skew, so scaling is needed.</td></tr>
+<tr><td>4.4 Boxplots by class</td><td>Do the typical values differ between classes? Are outliers real?</td><td>Claimants have lower median income ($43.7k vs $58.1k) and home value, but the boxes overlap a lot: no single feature separates the classes.</td></tr>
+<tr><td>4.5 Claim rate by category</td><td>Which categories are risky? Is EDUCATION ordered?</td><td>Urban 31.7% vs rural 6.5%. Revoked licence and single parents about 45%. Education falls steadily (34.7% → 16.5%), so ordinal. Red car makes no difference.</td></tr>
+<tr><td>4.6 Spearman correlation</td><td>How strong is each link to the target? Any redundant pairs?</td><td>All weak (max 0.244, <code>CLM_FREQ</code>). <code>OLDCLAIM</code> and <code>CLM_FREQ</code> are near-duplicates (0.93).</td></tr>
+</table>
+<div class="box"><b>Why Spearman and not Pearson?</b> Pearson measures straight-line relationships and is pulled around by outliers and skew. Spearman works on ranks, so it catches any relationship that always goes up (or down) and is robust to the skewed money columns.</div>
+<div class="box good"><b>EDA conclusion you can say in one line:</b> the signal is real but spread thinly across many weak features, so the model must combine them, and accuracy is the wrong metric because of the 73/27 imbalance.</div>
+
+<h2 id="s5">5. Preprocessing</h2>
+<p><b>Zero values:</b> we checked whether zeros are hidden missing values. They are not: the dataset already uses NaN for unknowns, income and years-on-job are zero together (students and home makers), home value zero matches renters, and zero past claims match in both claim columns. Replacing them would destroy real signal (zero income customers claim 40% vs 25.6%).</p>
+<p><b>Train/test split:</b> 80/20, <code>stratify=y</code>, so both sets keep the 26.7% claim rate. The test set (2,061 customers) is locked away until Section 9.</p>
+<table>
+<tr><th>Group</th><th>Missing values</th><th>Encoding / scaling</th><th>Why</th></tr>
+<tr><td>Numeric (13)</td><td>Median</td><td>StandardScaler</td><td>Median is robust to skew. Scaling is needed by KNN, SVM, LR.</td></tr>
+<tr><td>Binary (7)</td><td>Most frequent</td><td>OneHotEncoder(drop="if_binary")</td><td>Two categories need one 0/1 column.</td></tr>
+<tr><td>Ordinal (EDUCATION)</td><td>Most frequent</td><td>OrdinalEncoder in order, then scaled</td><td>Keeps the natural order seen in 4.5.</td></tr>
+<tr><td>Nominal (OCCUPATION, CAR_TYPE)</td><td>Constant "Unknown"</td><td>OneHotEncoder</td><td>No order. "Unknown" avoids labelling 6.5% of rows as high-risk "Blue Collar".</td></tr>
+</table>
+<p>Result: 23 features become <b>36 columns</b>. The same <code>preprocessor</code> is placed inside every model's <code>Pipeline</code>, so during cross-validation it is re-fitted on each training fold only. <code>preprocessor_for(features)</code> makes a copy restricted to a chosen feature subset (used in Sections 7 and 8).</p>
+
+<h2 id="s6">6. Baseline Models</h2>
+<p><b>What we did:</b> trained the Dummy and the 5 models with default settings using the same 5 stratified folds, scoring accuracy, precision, recall, F1 and ROC-AUC. Then compared training and validation F1 to spot overfitting.</p>
+<table>
+<tr><th>Model</th><th class="n">CV ROC-AUC</th><th class="n">CV F1</th><th class="n">Train-val gap (F1)</th></tr>
+<tr><td>Gradient Boosting</td><td class="n">0.823</td><td class="n">0.523</td><td class="n">0.073</td></tr>
+<tr><td>Logistic Regression</td><td class="n">0.810</td><td class="n">0.509</td><td class="n">0.007</td></tr>
+<tr><td>SVM</td><td class="n">0.794</td><td class="n">0.474</td><td class="n">0.128</td></tr>
+<tr><td>KNN</td><td class="n">0.704</td><td class="n">0.404</td><td class="n">0.185</td></tr>
+<tr><td>Decision Tree</td><td class="n">0.615</td><td class="n">0.438</td><td class="n">0.562</td></tr>
+<tr><td>Dummy</td><td class="n">0.500</td><td class="n">0.000</td><td class="n">n/a (accuracy 0.733)</td></tr>
+</table>
+<p><b>Reading it:</b> the unlimited Decision Tree memorises the training data (gap 0.562), a clear case of overfitting. Logistic Regression is almost as good as Gradient Boosting, so most of the signal is simple and additive. The good models have high precision but low recall: they rarely predict "claim" because claims are the minority.</p>
+
+<h2 id="s7">7. Feature Selection</h2>
+<p>We used the three families of methods from the module, then let every model vote on the result.</p>
+<table>
+<tr><th>Step</th><th>Method</th><th>Result</th></tr>
+<tr><td>7.1</td><td>Variance threshold (0.01)</td><td>Removed 0 columns. The lowest variance is 0.0303 (<code>OCCUPATION_Doctor</code>).</td></tr>
+<tr><td>7.2</td><td>Mutual information</td><td>Top: URBANICITY 0.033, OLDCLAIM 0.033, CLM_FREQ 0.032. Bottom: GENDER 0.0003, RED_CAR 0.0000. <b>Filter set = 21 features</b> (drop GENDER, RED_CAR).</td></tr>
+<tr><td>7.3</td><td>SFS with Logistic Regression</td><td>Best at 17 features (0.8111 vs 0.8100 with all 23). Drops AGE, HOMEKIDS, YOJ, CAR_AGE, GENDER, RED_CAR.</td></tr>
+<tr><td>7.4</td><td>SBS with Logistic Regression</td><td>Exactly the same 17 features and score. Two opposite searches agree.</td></tr>
+<tr><td>7.5</td><td>All models on all 3 sets</td><td>See table below.</td></tr>
+<tr><td>8.5</td><td>L1 (embedded)</td><td>Tuned LR chose L1 and set 3 columns to zero.</td></tr>
+</table>
+<table>
+<tr><th>Feature set</th><th class="n">DT</th><th class="n">GB</th><th class="n">KNN</th><th class="n">LR</th><th class="n">SVM</th></tr>
+<tr><td>All (23)</td><td class="n">0.6151</td><td class="n">0.8234</td><td class="n">0.7039</td><td class="n">0.8100</td><td class="n">0.7943</td></tr>
+<tr class="best"><td>Filter (21)</td><td class="n">0.6255</td><td class="n">0.8239</td><td class="n">0.7042</td><td class="n">0.8104</td><td class="n">0.7957</td></tr>
+<tr><td>SFS/SBS (17)</td><td class="n">0.6096</td><td class="n">0.8181</td><td class="n">0.7250</td><td class="n">0.8111</td><td class="n">0.7912</td></tr>
+</table>
+<p><b>Decision:</b> the filter set (21) for LR, DT, SVM and GB because it is equal or better for every model; the SFS set (17) for KNN only, because KNN gained the most (+0.021): irrelevant features add noise to its distance calculation. SFS was judged by LR, so it removed features (like CAR_AGE) that the non-linear models can still use.</p>
+
+<h2 id="s8">8. Hyperparameter Tuning</h2>
+<p><b>Validation curves first</b> (one hyperparameter at a time) to understand each model and choose sensible grid ranges:</p>
+<ul>
+  <li>Decision Tree depth: validation peaks at depth 5 (0.749), training reaches 1.0 at depth 20 while validation falls to 0.628.</li>
+  <li>Pruning <code>ccp_alpha</code>: 0 → 0.625, 0.001 → 0.756, 0.01 → 0.653 (too much pruning underfits).</li>
+  <li>KNN: k = 1 gives 0.616 (memorising), k = 75 gives 0.775.</li>
+  <li>LR <code>C</code>: 0.735 at C = 0.0001 (too much regularisation), flat at 0.810 from C = 0.1.</li>
+</ul>
+<p><b>Then GridSearchCV</b> on the training set with the same 5 folds, choosing by ROC-AUC (<code>refit="roc_auc"</code>). Every combination was logged as a nested MLflow run (114 trials).</p>
+<table>
+<tr><th>Model</th><th>Grid (combinations)</th><th>Best settings</th><th class="n">CV ROC-AUC</th><th class="n">Gain</th></tr>
+<tr class="best"><td>Gradient Boosting</td><td>trees, learning rate, depth (8)</td><td>300 trees, lr 0.05, depth 2</td><td class="n">0.8260</td><td class="n">+0.003</td></tr>
+<tr><td>SVM</td><td>C, gamma, class weight (8)</td><td>C 1, gamma 0.01, balanced</td><td class="n">0.8165</td><td class="n">+0.023</td></tr>
+<tr><td>Logistic Regression</td><td>C, L1/L2, class weight (16)</td><td>C 1, L1, no class weight</td><td class="n">0.8105</td><td class="n">+0.0005</td></tr>
+<tr><td>KNN</td><td>k, weights (10)</td><td>k 75, distance</td><td class="n">0.7770</td><td class="n">+0.073</td></tr>
+<tr><td>Decision Tree</td><td>depth, leaf size, pruning, class weight (72)</td><td>depth 10, leaf 50, ccp 0.0005, balanced</td><td class="n">0.7710</td><td class="n">+0.156</td></tr>
+</table>
+<p><b>Overfitting after tuning:</b> the Decision Tree gap fell from 0.562 to 0.059. KNN's training F1 is 1.0 because of <code>weights="distance"</code> (explained below), so its gap is not meaningful.</p>
+<p><b>L1 coefficients (8.5):</b> L1 zeroed <code>OCCUPATION_Unknown</code>, <code>CAR_TYPE_Panel Truck</code>, <code>OCCUPATION_Home Maker</code>. Biggest risk factors: urban (+2.46), revoked licence (+0.90), single parent (+0.41), sports car (+0.28). Biggest protective: manager (-0.81), private use (-0.75), minivan (-0.62), married (-0.42).</p>
+<p><b>Decision threshold (8.6):</b> <code>TunedThresholdClassifierCV</code> picks, with cross-validation on the training set, the threshold that maximises F1. Justification: a missed claimant (false negative) is more costly to an insurer than a false alarm.</p>
+<table>
+<tr><th>Model</th><th class="n">Threshold</th><th class="n">CV F1 before → after</th></tr>
+<tr><td>Gradient Boosting</td><td class="n">0.27</td><td class="n">0.524 → 0.611</td></tr>
+<tr><td>Logistic Regression</td><td class="n">0.317</td><td class="n">0.511 → 0.599</td></tr>
+<tr><td>KNN</td><td class="n">0.228</td><td class="n">0.299 → 0.563</td></tr>
+<tr><td>Decision Tree</td><td class="n">0.466</td><td class="n">0.545 → 0.551</td></tr>
+<tr><td>SVM</td><td class="n">0.093*</td><td class="n">0.601 → 0.603</td></tr>
+</table>
+<p class="muted">* The SVM has no probabilities, so its threshold is on its decision score where the default is 0. 0.093 is almost the default: <code>class_weight="balanced"</code> had already shifted it, so F1 barely changed. The same reason explains the small change for the balanced Decision Tree.</p>
+
+<h2 id="s9">9. Final Evaluation on the Test Set</h2>
+<p>The test set is used <b>once</b>, at the end, with the tuned models and their tuned thresholds.</p>
+<table>
+<tr><th>Model</th><th class="n">Accuracy</th><th class="n">Precision</th><th class="n">Recall</th><th class="n">F1</th><th class="n">ROC-AUC</th></tr>
+<tr class="best"><td>Gradient Boosting</td><td class="n">0.747</td><td class="n">0.516</td><td class="n">0.778</td><td class="n">0.621</td><td class="n">0.832</td></tr>
+<tr><td>SVM</td><td class="n">0.736</td><td class="n">0.503</td><td class="n">0.763</td><td class="n">0.606</td><td class="n">0.825</td></tr>
+<tr><td>Logistic Regression</td><td class="n">0.755</td><td class="n">0.530</td><td class="n">0.692</td><td class="n">0.600</td><td class="n">0.811</td></tr>
+<tr><td>Decision Tree</td><td class="n">0.673</td><td class="n">0.438</td><td class="n">0.818</td><td class="n">0.571</td><td class="n">0.793</td></tr>
+<tr><td>KNN</td><td class="n">0.681</td><td class="n">0.444</td><td class="n">0.783</td><td class="n">0.567</td><td class="n">0.780</td></tr>
+<tr><td>Dummy</td><td class="n">0.734</td><td class="n">0</td><td class="n">0</td><td class="n">0</td><td class="n">0.500</td></tr>
+</table>
+<div class="two">
+<div>
+<h3>Test ROC-AUC</h3>
+<div class="bar"><span class="name">Gradient Boosting</span><span class="track"><span class="fill" style="width:83.2%;display:block"></span></span><span class="val">0.832</span></div>
+<div class="bar"><span class="name">SVM</span><span class="track"><span class="fill" style="width:82.5%;display:block"></span></span><span class="val">0.825</span></div>
+<div class="bar"><span class="name">Logistic Reg.</span><span class="track"><span class="fill" style="width:81.1%;display:block"></span></span><span class="val">0.811</span></div>
+<div class="bar"><span class="name">Decision Tree</span><span class="track"><span class="fill" style="width:79.3%;display:block"></span></span><span class="val">0.793</span></div>
+<div class="bar"><span class="name">KNN</span><span class="track"><span class="fill" style="width:78.0%;display:block"></span></span><span class="val">0.780</span></div>
+<div class="bar"><span class="name">Dummy</span><span class="track"><span class="fill" style="width:50%;display:block;opacity:.45"></span></span><span class="val">0.500</span></div>
+</div>
+<div>
+<h3>Gradient Boosting confusion matrix</h3>
+<div class="cm">
+  <div class="h"></div><div class="h">Predicted no claim</div><div class="h">Predicted claim</div>
+  <div class="h">Actual no claim<br>(1,512)</div><div class="tn">TN 1,112</div><div class="fp">FP 400<br><small>false alarm</small></div>
+  <div class="h">Actual claim<br>(549)</div><div class="fn">FN 122<br><small>missed claim</small></div><div class="tp">TP 427</div>
+</div>
+</div>
+</div>
+<p><b>Reading the results:</b> the Dummy has 73.4% accuracy, higher than most real models, yet it catches zero claimants. That single fact proves why accuracy is the wrong metric. Test scores are close to CV scores (GB 0.826 CV vs 0.832 test), so there was no overfitting to the validation folds. The Decision Tree misses the fewest claimants (100) but raises the most false alarms (575). Gradient Boosting has the best balance and was logged as the final model in MLflow.</p>
+<p>Other test figures: macro F1 GB 0.715, LR 0.712, SVM 0.704. Average precision (area under the PR curve) GB 0.66, SVM 0.64, LR 0.63, KNN 0.57, DT 0.55.</p>
+
+<h2 id="s10">10. Learning Curves and Bias-Variance</h2>
+<table>
+<tr><th>Model</th><th class="n">Val ROC-AUC 20% → 100%</th><th class="n">Final gap</th><th class="n">Loss</th><th class="n">Bias</th><th class="n">Variance</th><th>Diagnosis</th></tr>
+<tr class="best"><td>Gradient Boosting</td><td class="n">0.808 → 0.826</td><td class="n">0.025</td><td class="n">0.200</td><td class="n">0.197</td><td class="n">0.035</td><td>Lowest error and bias, low variance</td></tr>
+<tr><td>Logistic Regression</td><td class="n">0.803 → 0.810</td><td class="n">0.005</td><td class="n">0.207</td><td class="n">0.205</td><td class="n">0.022</td><td>Bias-limited, flat: more data will not help</td></tr>
+<tr><td>KNN</td><td class="n">0.758 → 0.777</td><td class="n">0.223</td><td class="n">0.239</td><td class="n">0.236</td><td class="n">0.037</td><td>Gap is an artefact of distance weighting</td></tr>
+<tr><td>SVM</td><td class="n">0.799 → 0.816</td><td class="n">0.016</td><td class="n">0.281</td><td class="n">0.278</td><td class="n">0.040</td><td>Balanced weights raise 0-1 loss (more positive predictions)</td></tr>
+<tr><td>Decision Tree</td><td class="n">0.739 → 0.771</td><td class="n">0.045</td><td class="n">0.310</td><td class="n">0.277</td><td class="n">0.176</td><td>Highest variance: a single tree is unstable</td></tr>
+</table>
+<p><b>Conclusion:</b> all models are mainly limited by bias, not variance. The curves are flat or nearly flat at the end, so more customers would add little. Better results would need more informative features (for example driving mileage or telematics), not more rows.</p>
+<div class="box warn"><b>Careful with the bias-variance numbers:</b> they use 0-1 loss at the model's default cut-off, and models trained with <code>class_weight="balanced"</code> (SVM, DT) predict "claim" more often, which raises 0-1 loss even when their ranking is good. That is why SVM has high loss but good ROC-AUC. Use these numbers to compare bias versus variance within a model, not to rank models.</div>
+
+<!-- ============ CONCEPTS ============ -->
+
+<h2 id="c-data">Concepts: data and preprocessing</h2>
+<details open><summary>Supervised classification</summary><p>Learning from labelled examples (customers whose outcome we know) to predict a category for new examples. Here binary: claim or no claim.</p></details>
+<details><summary>Class imbalance</summary><p>When one class is much more common (73% vs 27%). Models drift towards predicting the majority. Fixes we used: stratification, metrics that care about the minority (F1, recall, ROC-AUC), <code>class_weight="balanced"</code>, and a lower decision threshold.</p></details>
+<details><summary>Data leakage</summary><p>When the model sees information during training that it would not have at prediction time, giving fake high scores. Two types here: <b>target leakage</b> (<code>CLM_AMT</code> is only known after a claim) and <b>train-test leakage</b> (learning imputation medians or scaling means from data that includes the validation or test rows). We avoided both: dropped <code>CLM_AMT</code>, and put preprocessing inside the pipeline so it is fitted on training folds only.</p></details>
+<details><summary>Train/test split and stratification</summary><p>We hold back 20% as a test set that plays the role of "future customers". <b>Stratified</b> means both parts keep the same class ratio (26.7% claims), so the test score is not distorted by an unlucky split.</p></details>
+<details><summary>Imputation (median, most frequent, constant)</summary><p>Filling missing values. <b>Median</b> for numbers because it ignores extreme values. <b>Most frequent</b> for binary/ordinal categories. <b>Constant "Unknown"</b> for nominal OCCUPATION, so missing rows are not wrongly merged into the largest (and high-risk) group.</p></details>
+<details><summary>Encoding: one-hot vs ordinal</summary><p>Models need numbers. <b>One-hot</b> creates one 0/1 column per category, used when there is no order (car type). <b>Ordinal</b> maps categories to ordered numbers (High School &lt; Bachelors &lt; PhD), used when order matters. <code>drop="if_binary"</code> keeps one column for yes/no features because the second column would be redundant.</p></details>
+<details><summary>Scaling (StandardScaler) and fit vs transform</summary><p>Rescales each numeric column to mean 0 and standard deviation 1, so income (tens of thousands) does not dominate kids (0 to 5). Needed by distance-based (KNN, SVM) and gradient-based (LR) models; trees do not care. <b>fit</b> learns the mean and std from training data; <b>transform</b> applies them. Test data is only transformed, never fitted, to prevent leakage.</p></details>
+<details><summary>Pipeline and ColumnTransformer</summary><p><code>ColumnTransformer</code> sends each column group to its own steps. <code>Pipeline</code> chains preprocessing and model into one object, so <code>fit</code> and <code>predict</code> run all steps in the right order. Inside cross-validation, the whole pipeline is re-fitted on each training fold, which is what prevents leakage.</p></details>
+<details><summary>Outliers and the IQR rule</summary><p>IQR = Q3 - Q1. Values below Q1 - 1.5×IQR or above Q3 + 1.5×IQR are flagged. Flagged does not mean wrong: here they were real customers (e.g. people with past claims), so we kept them.</p></details>
+<details><summary>Skewness</summary><p>How lopsided a distribution is. Positive skew: a long tail to the right (most people have 0 past claims, a few have very large ones). It motivated median imputation, scaling and Spearman correlation.</p></details>
+
+<h2 id="c-eval">Concepts: evaluation and metrics</h2>
+<p>All metrics use these four counts. Example: Gradient Boosting on the test set.</p>
+<table>
+<tr><th>Term</th><th>Meaning</th><th class="n">GB value</th></tr>
+<tr><td>True Positive (TP)</td><td>Claimant correctly flagged</td><td class="n">427</td></tr>
+<tr><td>False Negative (FN)</td><td>Claimant missed (the costly mistake)</td><td class="n">122</td></tr>
+<tr><td>False Positive (FP)</td><td>Non-claimant wrongly flagged (false alarm)</td><td class="n">400</td></tr>
+<tr><td>True Negative (TN)</td><td>Non-claimant correctly left alone</td><td class="n">1,112</td></tr>
+</table>
+<details open><summary>Accuracy</summary><p>(TP + TN) / all. Share of correct predictions. Misleading with imbalance: the Dummy gets 73.4% while catching nobody.</p></details>
+<details><summary>Precision</summary><p>TP / (TP + FP) = 427 / 827 = 0.516. "When the model says claim, how often is it right?" Low precision means many false alarms.</p></details>
+<details><summary>Recall (sensitivity)</summary><p>TP / (TP + FN) = 427 / 549 = 0.778. "Of all real claimants, how many did we catch?" The metric that cares about missed claims.</p></details>
+<details><summary>F1 score</summary><p>Harmonic mean of precision and recall: 2PR / (P + R) = 0.621 for GB. High only when both are reasonable. Used as the secondary metric and as the objective for the threshold.</p></details>
+<details><summary>ROC curve and ROC-AUC</summary><p>The ROC curve plots recall (true positive rate) against false positive rate for every possible threshold. AUC is the area under it: the probability that a random claimant gets a higher risk score than a random non-claimant. 0.5 = random guessing, 1.0 = perfect. It does not depend on the threshold or on class balance, which is why it was the main metric for comparing and tuning models.</p></details>
+<details><summary>Precision-recall curve and average precision</summary><p>Precision against recall for every threshold. More informative than ROC when the positive class is rare. Average precision summarises it in one number (GB 0.66). A random model would score about 0.27 (the claim rate).</p></details>
+<details><summary>Classification report, macro vs weighted average</summary><p>Precision, recall, F1 and support for each class. <b>Macro</b> averages the two classes equally (fair to the minority). <b>Weighted</b> averages by class size (dominated by "no claim").</p></details>
+<details><summary>Decision threshold</summary><p>A model gives a score; it predicts "claim" if the score is above the threshold (default 0.5 for probabilities). Lowering it catches more claimants (higher recall) at the cost of more false alarms (lower precision). ROC-AUC is unchanged because the ranking is unchanged; only precision, recall, F1 and accuracy move.</p></details>
+<details><summary>Cross-validation (StratifiedKFold, 5 folds)</summary><p>Split the training set into 5 parts keeping the class ratio. Train on 4, validate on 1, rotate 5 times, average. Gives a more reliable score than one validation split and uses all training data. The same <code>cv</code> object is used everywhere so all models see identical folds (a fair comparison).</p></details>
+<details><summary>Why the test set is used only once</summary><p>Every decision made by looking at a score "leaks" a little information. If we tuned on the test set, it would no longer be unseen. CV made all choices; the test set only confirms them.</p></details>
+<details><summary>Dummy baseline</summary><p><code>DummyClassifier(strategy="most_frequent")</code> always predicts "no claim". Any useful model must beat it on the metrics that matter.</p></details>
+
+<h2 id="c-models">Concepts: the 5 models and their hyperparameters</h2>
+<div class="box"><b>Parameter vs hyperparameter:</b> parameters are learned from data during training (LR weights, tree split points). Hyperparameters are settings we choose before training that control how the model learns (C, depth, k). We choose them with validation curves and grid search.</div>
+
+<div class="card">
+<h3><span class="tag">Linear</span>Logistic Regression</h3>
+<p><b>Idea:</b> a weighted sum of the features passed through a sigmoid to give a probability of claim. Each weight shows how a feature pushes the risk up or down, so it is easy to explain.</p>
+<ul>
+<li><code>C</code>: inverse of regularisation strength. Small C = strong penalty on large weights = simpler model (can underfit, as at C = 0.0001). Large C = weak penalty (can overfit). Best: 1.</li>
+<li><code>l1_ratio</code> (penalty type): 0 = L2 (ridge), shrinks all weights a little. 1 = L1 (lasso), can push weights to exactly 0, which is feature selection. Best: L1.</li>
+<li><code>class_weight</code>: None or "balanced" (makes mistakes on the rare class cost more). Best: None, the threshold handles imbalance instead.</li>
+<li><code>solver="saga"</code>: an optimiser that supports both L1 and L2.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3><span class="tag">Instance-based</span>K-Nearest Neighbours (KNN)</h3>
+<p><b>Idea:</b> no real training. To predict a customer, find the k most similar customers (by distance on scaled features) and let them vote.</p>
+<ul>
+<li><code>n_neighbors</code> (k): small k follows individual points (high variance, k = 1 memorises). Large k smooths the decision (more bias). Best: 75.</li>
+<li><code>weights</code>: "uniform" (every neighbour equal) or "distance" (closer neighbours count more). Best: distance.</li>
+</ul>
+<p class="muted"><b>Why training F1 = 1.0:</b> with distance weighting, a training point is its own nearest neighbour at distance 0, and a zero-distance neighbour gets all the weight, so it always predicts its own label. This is not a bug; it is why the training score is not meaningful for KNN. The validation score is what counts.</p>
+<p class="muted"><b>Why it needs feature selection most:</b> every feature enters the distance, so useless features add noise for all customers (the "curse of dimensionality").</p>
+</div>
+
+<div class="card">
+<h3><span class="tag">Kernel</span>Support Vector Machine (SVM, RBF kernel)</h3>
+<p><b>Idea:</b> find the boundary that separates the classes with the widest possible margin. The RBF kernel lets the boundary be curved by measuring similarity between customers.</p>
+<ul>
+<li><code>C</code>: penalty for points on the wrong side of the margin. Large C = tries to classify every training point correctly (narrow margin, overfit risk). Small C = wider, smoother margin. Best: 1.</li>
+<li><code>gamma</code>: how far the influence of one training point reaches. Large gamma = very local, wiggly boundary (overfit). Small gamma = smooth boundary. Best: 0.01.</li>
+<li><code>class_weight</code>: Best: balanced.</li>
+</ul>
+<p class="muted">Slowest model to train (about O(n²)), which is why its grid was kept small (8 combinations).</p>
+</div>
+
+<div class="card">
+<h3><span class="tag">Tree</span>Decision Tree</h3>
+<p><b>Idea:</b> a flowchart of yes/no questions ("urban?", "past claims &gt; 0?") learned by picking the split that best separates the classes at each step. Very interpretable, but unstable.</p>
+<ul>
+<li><code>max_depth</code>: maximum number of questions in a path. Too deep = memorises (baseline gap 0.562). Best: 10.</li>
+<li><code>min_samples_leaf</code>: the minimum number of customers in a final leaf. Larger = smoother, avoids rules based on a handful of people. Best: 50.</li>
+<li><code>ccp_alpha</code>: cost-complexity pruning. After growing, branches whose improvement is smaller than alpha are cut back. Best: 0.0005.</li>
+<li><code>class_weight</code>: Best: balanced.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3><span class="tag">Ensemble</span>Gradient Boosting</h3>
+<p><b>Idea:</b> build many small trees one after another; each new tree corrects the errors the previous trees still make. The final prediction adds them all up. Boosting mainly reduces bias.</p>
+<ul>
+<li><code>n_estimators</code>: number of trees. More trees = more corrections (too many can overfit). Best: 300.</li>
+<li><code>learning_rate</code>: how much each tree is allowed to correct. Smaller = slower, more careful learning, usually needs more trees. Best: 0.05.</li>
+<li><code>max_depth</code>: size of each tree. Depth 2 means each tree can capture interactions between 2 features. Best: 2.</li>
+<li><code>subsample=0.8</code> (fixed): each tree sees a random 80% of rows, which adds randomness and lowers variance (stochastic gradient boosting).</li>
+</ul>
+</div>
+
+<h3>Tuning tools</h3>
+<details open><summary>GridSearchCV</summary><p>Tries every combination in the grid with 5-fold CV and keeps the best by ROC-AUC (<code>refit="roc_auc"</code>), then retrains it on the full training set. Exhaustive and simple; cost grows with the grid size (DT grid = 4 × 3 × 3 × 2 = 72).</p></details>
+<details><summary>Validation curve</summary><p>Training and validation score while one hyperparameter changes. Where they split apart is overfitting; where both are low is underfitting. We used it to pick sensible grid ranges.</p></details>
+<details><summary>class_weight="balanced"</summary><p>Weights each class inversely to its frequency, so a mistake on a claimant costs about 2.75 times a mistake on a non-claimant during training.</p></details>
+<details><summary>TunedThresholdClassifierCV</summary><p>Wraps a tuned model and searches, with cross-validation on the training set, for the threshold that maximises F1. The test set is not used.</p></details>
+
+<h2 id="c-fs">Concepts: feature selection</h2>
+<p>Why do it: remove noise, reduce overfitting, speed up training, and make the model easier to explain.</p>
+<table>
+<tr><th>Family</th><th>Method</th><th>How it works</th><th>Pros / cons</th></tr>
+<tr><td>Filter</td><td>Variance threshold</td><td>Removes columns that almost never change (variance below 0.01).</td><td>Very fast; ignores the target.</td></tr>
+<tr><td>Filter</td><td>Mutual information</td><td>Measures how much knowing a feature reduces uncertainty about the target. Catches non-linear links. Scores were summed per original feature.</td><td>Fast, model-free; looks at one feature at a time.</td></tr>
+<tr><td>Wrapper</td><td>SFS (forward)</td><td>Start empty, add the feature that improves CV ROC-AUC most, repeat.</td><td>Uses a real model; slow and tied to that model (LR here).</td></tr>
+<tr><td>Wrapper</td><td>SBS (backward)</td><td>Start with all, remove the feature whose removal hurts least, repeat.</td><td>Same; agreeing with SFS makes the result convincing.</td></tr>
+<tr><td>Embedded</td><td>L1 regularisation</td><td>The penalty pushes useless weights to exactly 0 while the model trains.</td><td>Free with training; only for linear models.</td></tr>
+</table>
+<p class="muted"><code>feature_groups</code> in SFS/SBS keeps all one-hot columns of a feature together, so the search adds or removes whole features, not single categories.</p>
+
+<h2 id="c-diag">Concepts: bias, variance and the curves</h2>
+<div class="two">
+<div class="card"><h3>Bias (underfitting)</h3><p>Error from a model that is too simple to capture the pattern. It is wrong in the same way no matter which training data it sees. Signs: training and validation scores both low and close together. Example: Logistic Regression (gap 0.005, flat at 0.810).</p></div>
+<div class="card"><h3>Variance (overfitting)</h3><p>Error from a model that is too sensitive to the specific training data. It learns noise, so it changes a lot when the data changes. Signs: training score much higher than validation. Example: the unpruned Decision Tree (gap 0.562), and the tuned tree still has the highest variance (0.176).</p></div>
+</div>
+<details open><summary>The bias-variance trade-off</summary><p>Making a model more flexible (deeper tree, smaller k, larger C or gamma) lowers bias but raises variance. Regularisation (pruning, larger k, smaller C, L1/L2) does the opposite. Tuning searches for the sweet spot. Total error ≈ bias + variance + noise that no model can remove.</p></details>
+<details><summary>Learning curve</summary><p>Training and validation score as the training set grows. If the validation curve is still rising, more data would help (variance problem). If both curves have met and gone flat, more data will not help (bias problem); you need a more flexible model or better features.</p></details>
+<details><summary>Bias-variance decomposition (mlxtend)</summary><p>Trains the model 20 times on bootstrap samples of the training set and predicts the test set each time. <b>Bias</b> = how often the most common prediction is wrong. <b>Variance</b> = how often individual predictions disagree with the most common one. Uses 0-1 loss.</p></details>
+<details><summary>Overfitting check (train vs validation gap)</summary><p>From <code>cross_validate(..., return_train_score=True)</code>. A large gap means the model scores well on data it has seen and worse on new data.</p></details>
+
+<h2 id="c-mlflow">Concepts: MLflow</h2>
+<p>An experiment-tracking tool. A <b>run</b> stores <b>parameters</b> (settings), <b>metrics</b> (scores), <b>tags</b> (labels such as stage = tuning) and <b>artifacts</b> (plots, reports, the model file).</p>
+<table>
+<tr><th>Stage</th><th class="n">Runs</th><th>Contents</th></tr>
+<tr><td>EDA</td><td class="n">1</td><td>The 6 EDA figures</td></tr>
+<tr><td>Baselines</td><td class="n">7</td><td>6 models + comparison plot</td></tr>
+<tr><td>Feature selection</td><td class="n">20</td><td>filter, SFS, SBS, comparison, decision + 15 model × feature-set runs</td></tr>
+<tr><td>Tuning</td><td class="n">122</td><td>5 parent searches with 114 nested trials, plus validation curves, baseline vs tuned, L1 coefficients</td></tr>
+<tr><td>Threshold</td><td class="n">5</td><td>threshold and F1 before/after</td></tr>
+<tr><td>Test</td><td class="n">10</td><td>6 model results + comparison, confusion matrices, reports, ROC/PR</td></tr>
+<tr><td>Final model, learning curves, bias-variance</td><td class="n">3</td><td>saved Gradient Boosting model, figures, bias/variance metrics</td></tr>
+<tr><td><b>Total</b></td><td class="n"><b>168</b></td><td>all finished, verified against the notebook</td></tr>
+</table>
+<p class="muted"><b>Nested runs:</b> each GridSearch is a parent run and each combination is a child run, so all trials of one model are grouped. The final model was saved with <code>serialization_format="cloudpickle"</code> because the default format cannot store the threshold wrapper.</p>
+
+<!-- ============ Q&A ============ -->
+<h2 id="qa">Likely questions and short answers</h2>
+<details><summary>Why is ROC-AUC your main metric and not accuracy?</summary><p>Accuracy rewards predicting the majority: the Dummy scores 73.4% and catches no claimant. ROC-AUC measures how well the model ranks claimants above non-claimants, independent of the threshold and class balance. F1 is reported alongside because it reflects the chosen threshold.</p></details>
+<details><summary>Why did you drop CLM_AMT?</summary><p>It is target leakage: CLM_AMT &gt; 0 exactly when CLAIM_FLAG = 1, and the amount only exists after a claim. Keeping it would give a near-perfect but useless model.</p></details>
+<details><summary>How did you prevent data leakage in preprocessing?</summary><p>Preprocessing is inside the pipeline, so during CV the imputer and scaler are fitted on the 4 training folds only. The test set is only transformed with values learned from training data and was used once at the end.</p></details>
+<details><summary>Why impute instead of dropping missing rows?</summary><p>Only 1.08% of cells are missing, but they are spread over 25.67% of rows. Dropping would lose a quarter of the data. Missingness is not related to the target, so imputation is safe.</p></details>
+<details><summary>Why "Unknown" for OCCUPATION but most frequent for other categories?</summary><p>The most frequent occupation is Blue Collar, a high-risk group (35.1%). Missing-occupation rows claim at 26.2%, close to average, so forcing them into Blue Collar would distort that group.</p></details>
+<details><summary>Why are the zeros real values and not missing?</summary><p>The dataset already uses NaN for unknowns in the same columns. Zero income goes with zero years-on-job (students, home makers), zero home value with renters, and zero past claims match in both claim columns. Zero-income customers claim 40% vs 25.6%, so the zeros carry signal.</p></details>
+<details><summary>Why did you keep the outliers?</summary><p>They are real customers (people with kids, past claims, high income), not errors. The IQR rule flags them because those columns are mostly zeros. Removing them would remove high-risk customers.</p></details>
+<details><summary>Why does Logistic Regression do almost as well as Gradient Boosting?</summary><p>Most of the signal is additive: each risk factor pushes the risk up or down on its own. Gradient Boosting adds a little by capturing interactions (depth-2 trees), +0.02 ROC-AUC on test.</p></details>
+<details><summary>Why did the Decision Tree gain the most from tuning?</summary><p>By default it grows until it memorises the training data (gap 0.562). Limiting depth, leaf size and pruning removed most of that overfitting: +0.156 ROC-AUC.</p></details>
+<details><summary>KNN has training F1 of 1.0. Is it overfitting?</summary><p>Not in the usual sense. With distance weighting, each training point is its own neighbour at distance 0 and decides its own label. It is a property of the weighting, so we judge KNN on validation and test scores only.</p></details>
+<details><summary>Why lower the threshold? Isn't that cheating?</summary><p>No. The threshold was chosen with CV on the training set only, by maximising F1. For an insurer a missed claimant costs more than a false alarm, so trading some precision for recall is a business decision. ROC-AUC does not change.</p></details>
+<details><summary>Why use different feature sets for KNN?</summary><p>Each model was scored on each set with the same CV. KNN gained +0.021 with the 17 SFS features because irrelevant features add noise to distances. The other models were equal or better with the 21-feature filter set.</p></details>
+<details><summary>SFS and SBS gave the same answer. What does that tell you?</summary><p>Two searches from opposite directions reaching the same 17 features is strong evidence that the 6 dropped features are not needed by a linear model.</p></details>
+<details><summary>Is your best model overfitting?</summary><p>No. Train-validation gap 0.025, test ROC-AUC (0.832) close to CV (0.826), and low variance (0.035) in the decomposition.</p></details>
+<details><summary>How would you improve the results?</summary><p>The learning curves are flat, so more customers will not help much. The limit is bias from the features: better features (mileage, telematics, claim history detail) would help more than more rows or a more complex model.</p></details>
+<details><summary>Why Spearman correlation?</summary><p>Many features are skewed with outliers. Spearman uses ranks, so it is robust to both and captures any monotonic relationship, not only straight lines.</p></details>
+<details><summary>Why stratify the split and the folds?</summary><p>To keep the 26.7% claim rate in every part. Otherwise one fold could get more or fewer claimants by chance, making scores noisy and unfair between models.</p></details>
+<details><summary>What does the red car result show?</summary><p>Red and non-red cars have the same claim rate (26.2% vs 26.9%), mutual information is 0, and SFS/SBS drop it. The common belief is not supported by this data.</p></details>
+<details><summary>Which features drive the risk?</summary><p>Urban living (LR weight +2.46), revoked licence (+0.90), single parent (+0.41), sports car, past claims and traffic points raise risk. Manager occupation, private car use, minivan and being married lower it.</p></details>
+
+<h2 id="numbers">Numbers to remember</h2>
+<div class="grid">
+  <div class="stat"><div class="v">73.3 / 26.7</div><div class="l">class split (%)</div></div>
+  <div class="stat"><div class="v">25.67%</div><div class="l">rows with a missing value</div></div>
+  <div class="stat"><div class="v">8,240 / 2,061</div><div class="l">train / test customers</div></div>
+  <div class="stat"><div class="v">36</div><div class="l">columns after preprocessing</div></div>
+  <div class="stat"><div class="v">21 / 17</div><div class="l">filter / SFS feature sets</div></div>
+  <div class="stat"><div class="v">0.826</div><div class="l">GB CV ROC-AUC (tuned)</div></div>
+  <div class="stat"><div class="v">0.832</div><div class="l">GB test ROC-AUC</div></div>
+  <div class="stat"><div class="v">0.778</div><div class="l">GB test recall</div></div>
+  <div class="stat"><div class="v">0.27</div><div class="l">GB tuned threshold</div></div>
+  <div class="stat"><div class="v">+0.156</div><div class="l">DT gain from tuning</div></div>
+</div>
+<p class="muted" style="margin-top:30px">All numbers come from the executed notebook and were checked against the MLflow runs.</p>
+</main>
+</div>
+</body>
+</html>
