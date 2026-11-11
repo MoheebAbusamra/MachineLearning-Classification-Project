@@ -1,80 +1,71 @@
 # Car Insurance Claim Prediction
 
-A machine learning classification project that predicts whether a customer will submit an auto insurance claim based on demographic, financial, vehicle, and driving history attributes.
+A machine learning classification project that predicts whether a customer will file a car insurance claim, based on demographic, financial, vehicle and driving history attributes.
 
 ## Project Overview
 
-In motor insurance, assessing claim risk accurately is essential for underwriting and premium pricing. This project builds and evaluates classification models to predict the binary target `CLAIM_FLAG`:
+In motor insurance, predicting claim risk helps with underwriting and premium pricing. The target is `CLAIM_FLAG`:
 
 * `0`: Customer did not file a claim
 * `1`: Customer filed a claim
 
-The workflow covers data auditing, exploratory data analysis, cleaning and preprocessing, feature engineering, and experiment tracking using MLflow.
+The notebook covers data auditing, cleaning, exploratory data analysis, preprocessing, baseline models, feature selection, hyperparameter tuning, final evaluation on a held-out test set, learning curves and a bias-variance analysis. Every step is tracked with MLflow.
 
-## Key Challenges and Solutions
+## Models
 
-* **Target Imbalance:** About 73% of customers did not file a claim while 27% filed a claim. Evaluation focuses on metrics like ROC-AUC and F1-score rather than accuracy alone.
-* **Data Leakage Prevention:** The column `CLM_AMT` (claim payout amount) was dropped because it is only known after a claim occurs.
-* **Messy Real-World Data:** 
-  * Currency fields formatted as text strings were cleaned into numeric values.
-  * Inconsistent and impossible values were audited and corrected.
-  * Missing values were evaluated and handled using imputation rather than row deletion to preserve data volume.
-* **Feature Categorization:** Attributes are organized into numeric, binary, ordinal (Education), and nominal (Occupation, Car Type) groups with tailored transformations for each group.
+Dummy baseline, Logistic Regression, Decision Tree, KNN, SVM and Gradient Boosting (scikit-learn).
+
+## Key Points
+
+* **Class imbalance:** about 73% of customers did not claim and 27% did. Models are compared with ROC-AUC and F1, not accuracy.
+* **Data leakage:** `CLM_AMT` (claim payout) was dropped because it is only known after a claim happens.
+* **Messy data:** currency stored as text, `z_` label prefixes, impossible values and missing values were fixed. Missing values are imputed inside the pipeline.
+* **Feature selection:** variance threshold, mutual information, SFS and SBS (mlxtend) and L1 regularisation.
+* **Result:** the tuned Gradient Boosting model reaches a test ROC-AUC of 0.832 and catches about 78% of the claimants.
 
 ## Project Structure
 
 ```text
 ML_Classification_Project/
-│
 ├── data/
 │   └── car_insurance_claim.csv               # Dataset
-├── mlruns/                                   # Local MLflow tracking logs
-├── Car_Insurance_Claim_Classification.ipynb  # Main analysis and modeling notebook
-├── .gitignore                                # Git ignore rules
-└── README.md                                 # Project documentation
+├── mlruns/                                   # Local MLflow tracking logs (created when the notebook runs)
+├── Car_Insurance_Claim_Classification.ipynb  # Main notebook
+├── .gitignore
+└── README.md
 ```
 
 ## Dataset Summary
 
-* **Records:** 10,302 rows
-* **Features:** Demographic, driving record, financial, and vehicle attributes
+* **Records:** 10,302 rows (10,301 after removing one duplicate)
+* **Features:** 23 after cleaning (numeric, binary, ordinal and nominal)
 * **Target:** `CLAIM_FLAG` (binary: 0 or 1)
+* **Source:** https://www.kaggle.com/datasets/xiaomengsun/car-insurance-claim-data
 
 ## Getting Started
 
-### 1. Prerequisites
-
-Make sure you have Python 3.9 or newer installed on your machine.
-
-### 2. Installation
-
-Clone or download this repository, then install the required dependencies:
+### 1. Installation
 
 ```bash
 pip install -U scikit-learn mlflow mlxtend pandas numpy matplotlib seaborn
 ```
 
-### 3. Run the Notebook
+### 2. Run the Notebook
 
-Launch JupyterLab or Jupyter Notebook:
+Open `Car_Insurance_Claim_Classification.ipynb` and run all cells in order. A full run takes about 10 minutes.
 
-```bash
-jupyter notebook Car_Insurance_Claim_Classification.ipynb
-```
+### 3. MLflow Experiment Tracking
 
-Run the cells sequentially to reproduce the exploratory analysis, data cleaning, and experiments.
-
-### 4. MLflow Experiment Tracking
-
-To view and compare experiment runs, metrics, and parameters in the MLflow dashboard, run the following command in the project root:
+From the project folder:
 
 ```bash
-mlflow ui
+# Windows (PowerShell)
+$env:MLFLOW_ALLOW_FILE_STORE="true"
+mlflow ui --backend-store-uri file:./mlruns
 ```
 
-Then open your browser and navigate to `http://localhost:5000`.
+Then open `http://127.0.0.1:5000`.
 
 ## Author
 
-* **Moheeb Abusamra** 
-
+* **Moheeb Abusamra**
